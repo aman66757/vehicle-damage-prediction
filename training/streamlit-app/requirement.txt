@@ -1,0 +1,6 @@
+streamlit==1.54.0
+fastapi==0.141.1
+uvicorn==0.52.4
+Pillow==12.3.0
+torch==2.14.0+cpu
+torchvision==0.29.0+cpu

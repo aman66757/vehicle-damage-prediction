@@ -1,0 +1,22 @@
+# Virtual environment
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# IDE
+.idea/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Dataset
+training/dataset/
+
+# Temporary files
+temp_file.jpg
+desktop.ini
+
+# Logs
+*.log
