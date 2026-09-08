@@ -4,10 +4,6 @@ from PIL import Image
 from model_helper import predict, class_names
 
 
-# ============================================================
-# PAGE CONFIG
-# ============================================================
-
 st.set_page_config(
     page_title="AutoGuard AI",
     page_icon="🚗",
@@ -15,12 +11,7 @@ st.set_page_config(
 )
 
 
-# ============================================================
-# TITLE
-# ============================================================
-
 st.title("🚗 AutoGuard AI")
-
 st.subheader("Vehicle Damage Detection & Classification")
 
 st.write(
@@ -31,12 +22,9 @@ st.write(
 st.divider()
 
 
-# ============================================================
-# SIDEBAR
-# ============================================================
+# ---------------- SIDEBAR ----------------
 
 with st.sidebar:
-
     st.header("⚙️ Model Information")
 
     st.write("**Model:** ResNet50")
@@ -52,9 +40,7 @@ with st.sidebar:
         st.write("•", name)
 
 
-# ============================================================
-# IMAGE UPLOAD
-# ============================================================
+# ---------------- UPLOAD ----------------
 
 st.header("📤 Upload Vehicle Image")
 
@@ -64,29 +50,18 @@ uploaded_file = st.file_uploader(
 )
 
 
-# ============================================================
-# IF IMAGE IS UPLOADED
-# ============================================================
-
 if uploaded_file is not None:
 
     image = Image.open(uploaded_file).convert("RGB")
 
     st.divider()
 
-    # ========================================================
-    # IMAGE + RESULT COLUMNS
-    # ========================================================
-
     image_col, result_col = st.columns(
         [1.2, 1],
         gap="large"
     )
 
-
-    # ========================================================
-    # IMAGE
-    # ========================================================
+    # -------- IMAGE --------
 
     with image_col:
 
@@ -102,9 +77,7 @@ if uploaded_file is not None:
         )
 
 
-    # ========================================================
-    # PREDICTION
-    # ========================================================
+    # -------- AI ANALYSIS --------
 
     with result_col:
 
@@ -116,27 +89,40 @@ if uploaded_file is not None:
             use_container_width=True
         ):
 
-            with st.spinner(
-                "Analyzing vehicle..."
-            ):
+            with st.spinner("Analyzing vehicle..."):
 
-                predicted_name, confidence, probabilities = predict(
-                    image
-                )
+                predicted_name, confidence, probabilities = predict(image)
+
+            # Save results
+            st.session_state["predicted_name"] = predicted_name
+            st.session_state["confidence"] = confidence
+            st.session_state["probabilities"] = probabilities
+
+            st.success("Analysis Complete")
 
 
-            # =================================================
-            # MAIN RESULT
-            # =================================================
+    # -------- SHOW RESULT --------
 
-            st.success(
-                "Analysis Complete"
-            )
+    if "predicted_name" in st.session_state:
+
+        predicted_name = st.session_state["predicted_name"]
+        confidence = st.session_state["confidence"]
+        probabilities = st.session_state["probabilities"]
+
+        st.divider()
+
+        st.header("🎯 Prediction Result")
+
+        result_col1, result_col2 = st.columns(2)
+
+        with result_col1:
 
             st.metric(
                 label="Predicted Class",
                 value=predicted_name
             )
+
+        with result_col2:
 
             st.metric(
                 label="Confidence",
@@ -144,100 +130,77 @@ if uploaded_file is not None:
             )
 
 
-            # =================================================
-            # DAMAGE INFORMATION
-            # =================================================
+        if "Normal" in predicted_name:
 
-            if "Normal" in predicted_name:
+            st.info(
+                "✅ The model predicts that this vehicle "
+                "area appears to be normal."
+            )
 
-                st.info(
-                    "✅ The model predicts that this vehicle "
-                    "area appears to be normal."
-                )
+        else:
 
-            else:
-
-                st.warning(
-                    "⚠️ Damage has been detected in this "
-                    "vehicle area."
-                )
+            st.warning(
+                "⚠️ Damage has been detected in this "
+                "vehicle area."
+            )
 
 
-    # ========================================================
-    # PROBABILITIES
-    # ========================================================
+        # -------- DETAILED PREDICTION --------
 
-    st.divider()
+        st.divider()
 
-    st.header("📊 Detailed Prediction")
-
-    st.write(
-        "Probability assigned by the model to each class:"
-    )
-
-
-    # Combine names and probabilities
-
-    results = list(
-        zip(
-            class_names,
-            probabilities
-        )
-    )
-
-
-    # Sort highest probability first
-
-    results.sort(
-        key=lambda x: x[1],
-        reverse=True
-    )
-
-
-    # Display probabilities
-
-    for name, probability in results:
-
-        percentage = probability * 100
+        st.header("📊 Detailed Prediction")
 
         st.write(
-            f"**{name} — {percentage:.2f}%**"
+            "Probability assigned by the model to each class:"
         )
 
-        st.progress(
-            float(probability)
+        results = list(
+            zip(class_names, probabilities)
         )
 
+        results.sort(
+            key=lambda x: x[1],
+            reverse=True
+        )
 
-# ============================================================
-# NO IMAGE
-# ============================================================
+        for name, probability in results:
+
+            percentage = probability * 100
+
+            st.write(
+                f"**{name} — {percentage:.2f}%**"
+            )
+
+            st.progress(
+                float(probability)
+            )
+
 
 else:
 
     st.info(
-        "👆 Upload a vehicle image above to begin the analysis."
+        "👆 Upload a vehicle image above "
+        "to begin the analysis."
     )
 
 
-# ============================================================
-# FOOTER
-# ============================================================
+# ---------------- FOOTER ----------------
 
 st.divider()
 
 st.markdown(
     """
-    ### 🚗 AutoGuard AI
+### 🚗 AutoGuard AI
 
-    **AI-powered vehicle damage classification**
+**AI-powered vehicle damage classification**
 
-    Designed & Developed by **Aman Lamje **
+Designed & Developed by **Aman**
 
-    *Machine Learning • Deep Learning • Artificial Intelligence*
+*Exploring Computer Vision • Deep Learning • Artificial Intelligence*
 
-    `PyTorch` • `ResNet50` • `Streamlit` • `FastAPI`
-    """
+`PyTorch` • `ResNet50` • `Streamlit` • `FastAPI`
+"""
 )
 
 st.caption(
